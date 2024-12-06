@@ -44,27 +44,32 @@ const OFFSETS: DirectionDictionary<{ ox: number; oy: number }> = {
 };
 
 class TInput {
-    map: string[][];
-    width: number;
-    height: number;
+    readonly map: Uint8Array;
+    readonly width: number;
+    readonly height: number;
+    readonly startingPoint: Guard;
+
+    path: Position[] | undefined = [];
     guard: Guard = { x: 0, y: 0, direction: Direction.UP };
-    startingPoint: Guard;
     visited: Direction[] = [];
-    visitedCount: number = 0;
 
     constructor(data: string[]) {
-        this.map = data.map(s => s.split(''));
+        this.map = new Uint8Array(
+            data
+                .join('')
+                .split('')
+                .map(c => (c === '#' ? 1 : 0))
+        );
         this.width = data[0].length;
         this.height = data.length;
 
         let done = false;
         for (let x = 0; x < this.width && !done; x++) {
             for (let y = 0; y < this.height; y++) {
-                const c = CHAR_TO_DIRECTION[this.map[y][x]];
+                const c = CHAR_TO_DIRECTION[data[y][x]];
                 if (c !== undefined) {
                     this.setPosition(x, y, c);
                     this.guard.direction = c;
-                    this.map[y][x] = '.';
                     done = true;
                     break;
                 }
@@ -72,6 +77,27 @@ class TInput {
         }
 
         this.startingPoint = { ...this.guard };
+        this.path = [];
+    }
+
+    set(x: number, y: number, c: number): void {
+        this.map[x + y * this.width] = c;
+    }
+
+    get(x: number, y: number): number {
+        return this.map[x + y * this.width];
+    }
+
+    checkPoint(): { visited: Direction[]; guard: Guard } {
+        return {
+            visited: [...this.visited],
+            guard: { ...this.guard },
+        };
+    }
+
+    restore(visited: Direction[], guard: Guard): void {
+        this.visited = visited;
+        this.guard = guard;
     }
 
     reset() {
@@ -82,13 +108,15 @@ class TInput {
 
     setPosition(x: number, y: number, direction: Direction): boolean | -1 {
         const k = x + y * this.width;
+
         if (this.visited[k] === direction) {
-            return -1; // Suck in loop
+            return -1; // Stuck in loop
         }
 
-        if (!this.visited[k]) {
-            this.visitedCount++;
+        if (this.path && this.visited[k] === undefined) {
+            this.path.push({ x, y });
         }
+
         this.visited[k] = direction;
         this.guard.x = x;
         this.guard.y = y;
@@ -103,7 +131,7 @@ class TInput {
             return false;
         }
 
-        if (this.map[y][x] === '.') {
+        if (this.get(x, y) === 0) {
             return this.setPosition(x, y, this.guard.direction);
         } else {
             this.guard.direction = NEXT_DIRECTION[this.guard.direction];
@@ -138,32 +166,28 @@ export class Day6 extends Day<TInput> {
 
     part1(input: TInput): number {
         input.loop();
-        return input.visitedCount;
+        return input.path!.length + 1;
     }
 
     part2(input: TInput): number {
-        const path = input.visited.reduce((a: Position[], v, i) => {
-            if (v) {
-                const x = i % input.width;
-                const y = (i - x) / input.width;
-                if (x !== input.startingPoint.x || y !== input.startingPoint.y) {
-                    a.push({ x, y });
-                }
-            }
-            return a;
-        }, []);
+        const path = input.path!;
+
+        input.path = undefined;
 
         let total = 0;
+        input.reset();
         for (const { x, y } of path) {
-            input.reset();
-            input.map[y][x] = '#';
+            const { visited, guard } = input.checkPoint();
+            input.set(x, y, 1);
             if (!input.loop()) {
                 total++;
             }
-            input.map[y][x] = '.';
+            input.set(x, y, 0);
+            input.restore(visited, guard);
+            input.step();
         }
         return total;
     }
 }
 
-// new Day6().execute();
+new Day6().execute();
