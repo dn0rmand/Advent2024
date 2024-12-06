@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [       
+        {
+            "request": "launch",
+            "name": "DENO: Current File",
+            "type": "node",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "/opt/homebrew/bin/deno",
+            "runtimeArgs": ["run", "--inspect-wait", "--allow-all"],
+            "attachSimplePort": 9229,
+            "console": "integratedTerminal"
+          }
+    ]
+}
