@@ -5,7 +5,7 @@ import { Day3 } from './day3.ts';
 import { Day4 } from './day4.ts';
 import { Day5 } from './day5.ts';
 import { Day6 } from './day6.ts';
-// import { Day7 } from './day7.ts';
+import { Day7 } from './day7.ts';
 // import { Day8 } from './day8.ts';
 // import { Day9 } from './day9.ts';
 // import { Day10 } from './day10.ts';
@@ -32,7 +32,7 @@ const days: IDay[] = [
     new Day4(),
     new Day5(),
     new Day6(),
-    // new Day7(),
+    new Day7(),
     // new Day8(),
     // new Day9(),
     // new Day10(),
@@ -77,7 +77,7 @@ console.timeLog = (key: string, msg: string) => {
         const t = performance.measure(key, key + '$start', key + '$end');
         times[key] = {
             duration: t.duration,
-            message: `${t.duration}ms ${msg}`,
+            message: `${t.duration.toFixed(5)}ms ${msg}`,
         };
     }
 };
