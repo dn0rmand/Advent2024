@@ -28,16 +28,6 @@ export class Day7 extends Day<Equations> {
         return equations;
     }
 
-    unConcat(total: number, value: number): number {
-        const t = `${total}`;
-        const s = `${value}`;
-        if (t.endsWith(s)) {
-            return +t.substring(0, t.length - s.length);
-        } else {
-            return total;
-        }
-    }
-
     solveable(total: number, index: number, values: number[], part2: boolean): boolean {
         if (total < 0) {
             return false;
@@ -48,15 +38,18 @@ export class Day7 extends Day<Equations> {
 
         const v = values[values.length - 1 - index];
 
-        if (total % v === 0) {
-            if (this.solveable(total / v, index + 1, values, part2)) {
-                return true;
-            }
+        if (total % v === 0 && this.solveable(total / v, index + 1, values, part2)) {
+            return true;
         }
+
         if (part2) {
-            const total2 = this.unConcat(total, v);
-            if (total2 !== total && this.solveable(total2, index + 1, values, true)) {
-                return true;
+            const t = `${total}`;
+            const s = `${v}`;
+            if (t.endsWith(s)) {
+                const total2 = +t.substring(0, t.length - s.length);
+                if (this.solveable(total2, index + 1, values, true)) {
+                    return true;
+                }
             }
         }
 

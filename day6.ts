@@ -1,6 +1,7 @@
 import { Day } from './tools/day.ts';
 
 enum Direction {
+    NONE = 0,
     UP = 1,
     DOWN = 2,
     LEFT = 3,
@@ -18,6 +19,8 @@ type DirectionDictionary<T> = {
     [key in Direction]: T;
 };
 
+type Directions = Direction[] | Uint8Array;
+
 type Position = {
     x: number;
     y: number;
@@ -30,6 +33,7 @@ type Guard = {
 };
 
 const NEXT_DIRECTION: DirectionDictionary<Direction> = {
+    [Direction.NONE]: Direction.NONE,
     [Direction.UP]: Direction.RIGHT,
     [Direction.RIGHT]: Direction.DOWN,
     [Direction.DOWN]: Direction.LEFT,
@@ -37,6 +41,7 @@ const NEXT_DIRECTION: DirectionDictionary<Direction> = {
 };
 
 const OFFSETS: DirectionDictionary<{ ox: number; oy: number }> = {
+    [Direction.NONE]: { ox: 0, oy: 0 },
     [Direction.UP]: { ox: 0, oy: -1 },
     [Direction.RIGHT]: { ox: 1, oy: 0 },
     [Direction.DOWN]: { ox: 0, oy: 1 },
@@ -51,7 +56,7 @@ class TInput {
 
     path: Position[] | undefined = [];
     guard: Guard = { x: 0, y: 0, direction: Direction.UP };
-    visited: Direction[] = [];
+    visited: Directions;
 
     constructor(data: string[]) {
         this.map = new Uint8Array(
@@ -62,6 +67,7 @@ class TInput {
         );
         this.width = data[0].length;
         this.height = data.length;
+        this.visited = new Uint8Array(this.width * this.height);
 
         let done = false;
         for (let x = 0; x < this.width && !done; x++) {
@@ -88,20 +94,20 @@ class TInput {
         return this.map[x + y * this.width];
     }
 
-    checkPoint(): { visited: Direction[]; guard: Guard } {
+    checkPoint(): { visited: Directions; guard: Guard } {
         return {
-            visited: [...this.visited],
+            visited: Uint8Array.from(this.visited),
             guard: { ...this.guard },
         };
     }
 
-    restore(visited: Direction[], guard: Guard): void {
+    restore(visited: Directions, guard: Guard): void {
         this.visited = visited;
         this.guard = guard;
     }
 
     reset() {
-        this.visited = [];
+        this.visited.fill(Direction.NONE);
         this.guard = { ...this.startingPoint };
         this.setPosition(this.guard.x, this.guard.y, this.guard.direction);
     }
@@ -113,7 +119,7 @@ class TInput {
             return -1; // Stuck in loop
         }
 
-        if (this.path && this.visited[k] === undefined) {
+        if (this.path && this.visited[k] === Direction.NONE) {
             this.path.push({ x, y });
         }
 
