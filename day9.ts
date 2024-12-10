@@ -12,12 +12,23 @@ type Block = {
 class FileMap {
     start: Block;
     end: Block;
-
-    emptyBlocks: Block[] = [];
+    emptyBlockPerSize: Block[][] = [];
 
     constructor(data: string) {
         const values = data.split('').map(v => +v);
-        this.start = { occupied: true, moved: false, fileId: 0, length: values[0], next: null, previous: null };
+
+        for (let size = 0; size < 10; size++) {
+            this.emptyBlockPerSize[size] = [];
+        }
+
+        this.start = {
+            occupied: true,
+            moved: false,
+            fileId: 0,
+            length: values[0],
+            next: null,
+            previous: null,
+        };
         let fileId = 0;
         let previous = this.start;
         for (let i = 1, occupied = false; i < values.length; i++, occupied = !occupied) {
@@ -30,15 +41,15 @@ class FileMap {
             const b = { occupied, moved: false, fileId, length: values[i], previous, next: null };
             previous.next = b;
             previous = b;
-            if (!occupied) {
-                this.emptyBlocks.push(b);
+            if (b.length > 0 && !b.occupied) {
+                this.emptyBlockPerSize[b.length].push(b);
             }
         }
         this.end = previous;
         this.trim();
     }
 
-    trim() {
+    trim(): void {
         if (this.start === this.end) {
             return;
         }
@@ -48,7 +59,7 @@ class FileMap {
         }
     }
 
-    remove(block: Block) {
+    remove(block: Block): void {
         const p = block.previous;
         const n = block.next;
         if (p) {
@@ -64,7 +75,33 @@ class FileMap {
         }
     }
 
-    insertBefore(target: Block, block: Block) {
+    addEmptyBlock(b: Block): void {
+        if (b.length <= 0 || b.occupied) {
+            return;
+        }
+
+        const list = this.emptyBlockPerSize[b.length];
+        const pos = list.findIndex(s => s.fileId >= b.fileId);
+        list.splice(pos, 0, b);
+    }
+
+    findEmptyBlock(e: Block): Block | undefined {
+        let s1: Block | undefined;
+        let target: Block = e;
+        for (let size = e.length; size < this.emptyBlockPerSize.length; size++) {
+            const list = this.emptyBlockPerSize[size];
+            if (list.length > 0 && list[0].fileId < target.fileId) {
+                s1 = list[0];
+                target = s1!;
+            }
+        }
+        if (s1) {
+            this.emptyBlockPerSize[s1.length].shift();
+        }
+        return s1;
+    }
+
+    insertBefore(target: Block, block: Block): void {
         const p = target.previous!;
         block.previous = p;
         block.next = target;
@@ -72,7 +109,7 @@ class FileMap {
         p.next = block;
     }
 
-    pack() {
+    pack(): void {
         let s = this.start;
         while (s.next != null) {
             if (s.occupied) {
@@ -93,39 +130,41 @@ class FileMap {
         }
     }
 
-    pack2() {
+    pack2(): void {
         let e = this.end;
         while (e.previous != null) {
             if (!e.occupied || e.moved) {
                 e = e.previous;
             } else {
                 e.moved = true; // Mark as processed
-                const s = this.emptyBlocks.find(s => s.fileId < e.fileId && !s.occupied && s.length >= e.length);
-                if (s) {
-                    if (s.length === e.length) {
-                        s.fileId = e.fileId;
-                        s.moved = true;
-                        s.occupied = true;
-                        e.occupied = false;
-                    } else {
-                        const newBlock = {
-                            occupied: true,
-                            moved: true,
-                            fileId: e.fileId,
-                            length: e.length,
-                            next: null,
-                            previous: null,
-                        };
-                        this.insertBefore(s, newBlock);
-                        s.length -= e.length;
-                        e.occupied = false;
-                    }
+                const s = this.findEmptyBlock(e);
+                if (!s) {
+                    continue;
+                }
+                if (s.length === e.length) {
+                    s.fileId = e.fileId;
+                    s.moved = true;
+                    s.occupied = true;
+                    e.occupied = false;
+                } else {
+                    const newBlock = {
+                        occupied: true,
+                        moved: true,
+                        fileId: e.fileId,
+                        length: e.length,
+                        next: null,
+                        previous: null,
+                    };
+                    this.insertBefore(s, newBlock);
+                    e.occupied = false;
+                    s.length -= e.length;
+                    this.addEmptyBlock(s);
                 }
             }
         }
     }
 
-    get checksum() {
+    get checksum(): number {
         let result = 0;
         let pos = 0;
         for (let s = this.start; s != null; s = s.next!) {
@@ -161,4 +200,4 @@ export class Day9 extends Day<string> {
     }
 }
 
-new Day9().execute();
+// new Day9().execute();
