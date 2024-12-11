@@ -1,0 +1,54 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/assert@1": "1.0.9",
+    "jsr:@std/async@^1.0.9": "1.0.9",
+    "jsr:@std/internal@^1.0.5": "1.0.5",
+    "npm:three.js@*": "0.77.1",
+    "npm:three@*": "0.171.0",
+    "npm:three@0.171.0": "0.171.0"
+  },
+  "jsr": {
+    "@std/assert@1.0.9": {
+      "integrity": "a9f0c611a869cc791b26f523eec54c7e187aab7932c2c8e8bea0622d13680dcd",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/async@1.0.9": {
+      "integrity": "c6472fd0623b3f3daae023cdf7ca5535e1b721dfbf376562c0c12b3fb4867f91"
+    },
+    "@std/internal@1.0.5": {
+      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    }
+  },
+  "npm": {
+    "three.js@0.77.1": {
+      "integrity": "sha512-lVMYlBXhhHlZtsF+cQdev6WCm2fSWs3I+A6Z63j6TBmkVXOYgdo9AUCRemfsw5mllqWx23VubJ5Qt8/uWKQpJA==",
+      "dependencies": [
+        "three@0.77.0"
+      ]
+    },
+    "three@0.171.0": {
+      "integrity": "sha512-Y/lAXPaKZPcEdkKjh0JOAHVv8OOnv/NDJqm0wjfCzyQmfKxV7zvkwsnBgPBKTzJHToSOhRGQAGbPJObT59B/PQ=="
+    },
+    "three@0.77.0": {
+      "integrity": "sha512-YWEp8ahs2l+6fAFVbanLVQoSBwVq5jDct3nZdBSHHXb5I/w5oy/LCMAzIOAguKWclRqcjR4W1BeP5QBnftGbpA=="
+    }
+  },
+  "remote": {
+    "https://deno.land/x/cursed@0.0.5/mod.ts": "20186f92cec3a63a02d38c4478e93bb7f34f1c991df1d56286c07a030dbfa2fa",
+    "https://deno.land/x/cursed@0.0.5/src/ffi.ts": "25ff3d587abd492fa46a5b4ab00715a2ddabf2d36278c71dbf6897979552b42f",
+    "https://deno.land/x/cursed@0.0.5/src/helpers.ts": "90dec0bc1bb89294f9c5a526a636dd84fafa807def0c59cac501256c02f0b873",
+    "https://deno.land/x/cursed@0.0.5/src/hl.ts": "938472073185627b7f414a53c1f3714e235afa9ced90af87d88923cda9a4e07f",
+    "https://deno.land/x/cursed@0.0.5/src/ll.ts": "42a487693fff9756ea8538070a340c758414b6d19a0120a699048c45bfea5efd",
+    "https://deno.land/x/cursed@0.0.5/src/oo.ts": "7b486fad3ad7af2b407ae550c346918b7d39b8d05d1ceb16dc4ed8c6be632d7d",
+    "https://deno.land/x/cursed@0.0.5/src/symbols.ts": "519bbaf3df8c2110729ce05567702652cb378e28395f268d5e50df05090354f3"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@std/assert@1",
+      "jsr:@std/async@^1.0.9"
+    ]
+  }
+}
