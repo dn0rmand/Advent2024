@@ -117,4 +117,4 @@ export class Day8 extends Day<TInput> {
     }
 }
 
-new Day8().execute();
+// new Day8().execute();

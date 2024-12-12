@@ -51,4 +51,4 @@ export class Day11 extends Day<number[]> {
     }
 }
 
-new Day11().execute();
+// new Day11().execute();
