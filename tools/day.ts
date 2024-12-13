@@ -103,8 +103,6 @@ export abstract class AsyncDay<T> extends Day<T> {
 
             this.timeEnd('total');
         } catch (error) {
-            // deno-lint-ignore no-debugger
-            debugger;
             throw error;
         }
     }
