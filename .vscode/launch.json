@@ -1,9 +1,9 @@
 {
     "version": "0.2.0",
-    "configurations": [       
+    "configurations": [
         {
             "request": "launch",
-            "name": "DENO: Current File",
+            "name": "Advent: Current File",
             "type": "node",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
@@ -11,6 +11,17 @@
             "runtimeArgs": ["run", "--inspect-wait", "--allow-all"],
             "attachSimplePort": 9229,
             "console": "integratedTerminal"
-          }
+        },
+        {
+            "request": "launch",
+            "name": "iTerm: Current File",
+            "type": "node",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "/opt/homebrew/bin/deno",
+            "runtimeArgs": ["run", "--inspect-wait", "--allow-all"],
+            "attachSimplePort": 9229,
+            "console": "externalTerminal"
+        }
     ]
 }

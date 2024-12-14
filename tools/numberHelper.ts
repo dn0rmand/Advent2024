@@ -23,3 +23,33 @@ export function factorial(n: number): number {
     }
     return f;
 }
+
+export function modInv(value: number, modulo: number): number {
+    let t = 0;
+    let newT = 1;
+    let r = modulo;
+    let newR = value;
+    let q, lastT, lastR;
+
+    if (newR < 0) {
+        newR = -newR;
+    }
+
+    while (newR != 0) {
+        q = Math.floor(r / newR);
+        lastT = t;
+        lastR = r;
+        t = newT;
+        r = newR;
+        newT = lastT - q * newT;
+        newR = lastR - q * newR;
+    }
+    if (r != 1) {
+        throw new Error(`${value} and ${modulo} are not co-prime`);
+    }
+    if (t < 0) {
+        t += modulo;
+    }
+
+    return modulo < 0 ? -t : t;
+}

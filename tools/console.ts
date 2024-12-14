@@ -53,13 +53,21 @@ export class Console {
         bgBrightWhite: 107,
     };
 
-    static async write(data: string) {
+    static write(data: string) {
         if (Console.encoder === undefined) {
             Console.encoder = new TextEncoder();
         }
         const buffer = Console.encoder.encode(data);
 
         Deno.stdout.writeSync(buffer);
+    }
+
+    static savePosition(): void {
+        Console.write(Console.prefix + 's');
+    }
+
+    static restorePosition(): void {
+        Console.write(Console.prefix + 'u');
     }
 
     static up(num: number) {
