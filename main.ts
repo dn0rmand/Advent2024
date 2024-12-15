@@ -1,19 +1,19 @@
-import { IDay } from './tools/day.ts';
-import { Day1 } from './day1.ts';
-import { Day2 } from './day2.ts';
-import { Day3 } from './day3.ts';
-import { Day4 } from './day4.ts';
-import { Day5 } from './day5.ts';
-import { Day6 } from './day6.ts';
-import { Day7 } from './day7.ts';
-import { Day8 } from './day8.ts';
-import { Day9 } from './day9.ts';
-import { Day10 } from './day10.ts';
-import { Day11 } from './day11.ts';
-import { Day12 } from './day12.ts';
-import { Day13 } from './day13.ts';
-import { Day14 } from './day14.ts';
-// import { Day15 } from './day15.ts';
+import { IDay } from './tools/day.ts'
+import { Day1 } from './day1.ts'
+import { Day2 } from './day2.ts'
+import { Day3 } from './day3.ts'
+import { Day4 } from './day4.ts'
+import { Day5 } from './day5.ts'
+import { Day6 } from './day6.ts'
+import { Day7 } from './day7.ts'
+import { Day8 } from './day8.ts'
+import { Day9 } from './day9.ts'
+import { Day10 } from './day10.ts'
+import { Day11 } from './day11.ts'
+import { Day12 } from './day12.ts'
+import { Day13 } from './day13.ts'
+import { Day14 } from './day14.ts'
+import { Day15 } from './day15.ts'
 // import { Day16 } from './day16.ts';
 // import { Day17 } from './day17.ts';
 // import { Day18 } from './day18.ts';
@@ -40,7 +40,7 @@ const days: IDay[] = [
     new Day12(),
     new Day13(),
     new Day14(),
-    // new Day15(),
+    new Day15(),
     // new Day16(),
     // new Day17(),
     // new Day18(),
@@ -51,67 +51,67 @@ const days: IDay[] = [
     // new Day23(),
     // new Day24(),
     // new Day25(),
-];
+]
 
 type TimeEntry = {
-    duration: number;
-    message: string;
-};
-
-const times: { [id: string]: TimeEntry } = {};
-
-function compare(a: TimeEntry, b: TimeEntry): number {
-    return a.duration - b.duration;
+    duration: number
+    message: string
 }
 
-console.debug = () => {};
+const times: { [id: string]: TimeEntry } = {}
+
+function compare(a: TimeEntry, b: TimeEntry): number {
+    return a.duration - b.duration
+}
+
+console.debug = () => {}
 console.time = (key: string) => {
     if (key[0] == '@') {
-        performance.mark(key + '$start');
+        performance.mark(key + '$start')
     }
-};
+}
 
 console.timeLog = (key: string, msg: string) => {
     if (key[0] == '@') {
-        performance.mark(key + '$end');
-        const t = performance.measure(key, key + '$start', key + '$end');
+        performance.mark(key + '$end')
+        const t = performance.measure(key, key + '$start', key + '$end')
         times[key] = {
             duration: t.duration,
             message: `${t.duration.toFixed(5)}ms ${msg}`,
-        };
-    }
-};
-
-async function executeAll() {
-    console.log('***************************');
-    console.log('*** Advent of Code 2024 ***');
-    console.log('***************************');
-    console.log('');
-
-    console.time('@advent-2024');
-    for (const day of days) {
-        const key = `@day${day.day}`;
-        const msg = `to execute both parts of day ${day.day}`;
-        console.time(key);
-        if (day.isAsync) {
-            await day.executeAsync();
-        } else {
-            day.execute();
         }
-        console.timeLog(key, msg);
-    }
-    console.timeLog('@advent-2024', 'to execute them all');
-
-    console.log('');
-    console.log(times['@advent-2024'].message);
-    times['@advent-2024'].duration = 0; // For the sorting
-
-    const order = Object.values(times).sort((a: TimeEntry, b: TimeEntry) => compare(b, a));
-
-    console.log(`Slowest: ${order[0].message}`);
-    for (const key in times) {
-        console.log(times[key].message);
     }
 }
 
-await executeAll();
+async function executeAll() {
+    console.log('***************************')
+    console.log('*** Advent of Code 2024 ***')
+    console.log('***************************')
+    console.log('')
+
+    console.time('@advent-2024')
+    for (const day of days) {
+        const key = `@day${day.day}`
+        const msg = `to execute both parts of day ${day.day}`
+        console.time(key)
+        if (day.isAsync) {
+            await day.executeAsync()
+        } else {
+            day.execute()
+        }
+        console.timeLog(key, msg)
+    }
+    console.timeLog('@advent-2024', 'to execute them all')
+
+    console.log('')
+    console.log(times['@advent-2024'].message)
+    times['@advent-2024'].duration = 0 // For the sorting
+
+    const order = Object.values(times).sort((a: TimeEntry, b: TimeEntry) => compare(b, a))
+
+    console.log(`Slowest: ${order[0].message}`)
+    for (const key in times) {
+        console.log(times[key].message)
+    }
+}
+
+await executeAll()

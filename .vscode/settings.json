@@ -1,6 +1,6 @@
 {
     "deno.enable": true,
-    "typescript.format.semicolons": "insert",
+    "typescript.format.semicolons": "remove",
     "typescript.preferences.quoteStyle": "single",
     "editor.tabSize": 2,
     "editor.useTabStops": false,
@@ -14,5 +14,8 @@
     "debug.console.wordWrap": false,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
-    "editor.formatOnPaste": true
+    "editor.formatOnPaste": true,
+    "javascript.format.semicolons": "insert",
+    "javascript.inlayHints.enumMemberValues.enabled": true,
+    "prettier.semi": false
 }
