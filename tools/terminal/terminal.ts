@@ -1,0 +1,315 @@
+import { TerminalEvent } from './event.ts';
+import * as EscapeSequence from './escape_sequences.ts';
+import { detectTerminalEvent, IReader } from './input.ts';
+import { Color, Colors, createColor } from './color.ts';
+import { Cell, compareCells, createCell } from './cell.ts';
+import { isInsideRectangle, resizeNestedArray, writeToStream, IWriter } from './util.ts';
+
+export interface TerminalSize {
+    columns: number;
+    rows: number;
+}
+
+// TODO:
+// * Only process modified cells, and only if cell is modified do a compare
+//
+
+export class Terminal {
+    private running = false;
+    private rows: number;
+    private columns: number;
+    public inputStream: IReader;
+    public outputStream: IWriter;
+    private cells: Cell[][];
+    private currentScreen: Cell[][];
+    private stdoutBuffer = '';
+    public eventQueue: TerminalEvent[] = [];
+
+    private renderMap: Map<Color, string> = new Map();
+
+    /**
+     * Creates the terminal object
+     * @param {IReader} inputStream An input stream from which input events will be read
+     * @param {IWriter} outputStream An output stream to which the terminal will flush its output
+     */
+    constructor(inputStream: IReader = Deno.stdin, outputStream: IWriter = Deno.stdout) {
+        this.rows = 48;
+        this.columns = 80;
+        this.outputStream = outputStream;
+        this.inputStream = inputStream;
+
+        // Fill the canvas with nothing, required for the screen buffering system
+        this.currentScreen = [...Array(this.rows)].map(_x => Array(this.columns).fill(createCell()));
+
+        this.cells = [...Array(this.rows)].map(_x => Array(this.columns).fill(createCell()));
+    }
+
+    /**
+     * Initializes the terminal.
+     *
+     * More specifically, this function:
+     *
+     * 1. Sets raw mode, disabling any processing of input by the terminal (also disables echo)
+     * 2. Stores the screen state, so it can be restored later
+     * 3. Saves the cursor position, so it can be restored later
+     * 4. Hides the cursor in the terminal
+     * 5. Enables mouse reporting in the terminal, so mouse input events can be processed
+     * 6. Clears the screen
+     * 7. Updates the terminal size to its reported size
+     * 8. Starts the event parsing loop
+     * 9. Blanks the screen
+     *
+     * It is important to always call the 'close' function after calling this one, otherwise the
+     * terminal this is running on will become unresponsive.
+     */
+    async initialize() {
+        this.running = true;
+        Deno.stdin.setRaw(true);
+        await writeToStream(
+            this.outputStream,
+            EscapeSequence.SMCUP +
+                EscapeSequence.SAVE_CURSOR_POS +
+                EscapeSequence.HIDE_CURSOR +
+                EscapeSequence.ENABLE_MOUSE_REPORT +
+                EscapeSequence.CLS
+        );
+        this.parseEventLoop();
+
+        this.updateSize();
+
+        // Blank the screen with a black background
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.columns; x++) {
+                this.setCell(x, y, ' ', Colors.WHITE, Colors.BLACK);
+            }
+        }
+        await this.refresh();
+    }
+
+    /**
+     * Closes the terminal.
+     *
+     * This function does the exact opposite of the 'initialize' function. More specifically,
+     * this function:
+     *
+     * 1. Disables raw mode
+     * 2. Disables mouse reporting
+     * 3. Clears the screen
+     * 4. Restores the screen state
+     * 5. Restores the cursor position
+     * 6. Shows the cursor again
+     */
+    async close() {
+        this.running = false;
+        Deno.stdin.setRaw(false);
+        await writeToStream(
+            this.outputStream,
+            EscapeSequence.DISABLE_MOUSE_REPORT +
+                EscapeSequence.CLS +
+                EscapeSequence.RMCUP +
+                EscapeSequence.RESTORE_CURSOR_POS +
+                EscapeSequence.SHOW_CURSOR
+        );
+    }
+
+    /**
+     * Starts a loop that reads terminal input events from the inputstream
+     * and stores them in the event queue (FIFO).
+     *
+     * @param runOnce whether the function should run only once (for testing)
+     */
+    async parseEventLoop(runOnce = false) {
+        const event = await detectTerminalEvent(this.inputStream);
+
+        if (event != null) {
+            this.eventQueue.push(event);
+        }
+
+        if (!runOnce && this.running) {
+            setTimeout(() => this.parseEventLoop, 50);
+        }
+    }
+
+    /**
+     * Returns the oldest input event from the queue, or undefined if there
+     * weren't any events
+     *
+     * @returns {TerminalEvent} An input event
+     */
+    getEvent() {
+        return this.eventQueue.pop();
+    }
+
+    /**
+     * Sets the terminal size
+     *
+     * @param {number} columns Width of the terminal, measured in cells
+     * @param {number} rows Height of the terminal, measured in cells
+     */
+    setSize(columns: number, rows: number) {
+        this.rows = rows;
+        this.columns = columns;
+
+        // Resize the current screen
+        resizeNestedArray(this.currentScreen, columns, rows, createCell());
+        resizeNestedArray(this.cells, columns, rows, createCell());
+    }
+
+    /**
+     * Updates the terminal size to its actual size as reported by Deno
+     */
+    updateSize() {
+        const { columns, rows } = Deno.consoleSize();
+        this.setSize(columns, rows);
+    }
+
+    /**
+     * Returns the terminal size, measured in cells
+     *
+     * @returns {TerminalSize} An object containing the terminal row and columns size
+     */
+    getSize(): TerminalSize {
+        return {
+            columns: this.columns,
+            rows: this.rows,
+        };
+    }
+
+    /**
+     * Clears the terminal screen. Similar effect to running clear in a console.
+     */
+    async clear() {
+        await writeToStream(this.outputStream, EscapeSequence.CLS);
+    }
+
+    /**
+     * Indicates whether the given coordinates lie within the terminal or not
+     *
+     * @param {number} x x-coordinate
+     * @param {number} y y-coordinate
+     * @returns {boolean} a boolean indicating whether the given point lies within the terminal
+     */
+    isInsideTerminal(x: number, y: number): boolean {
+        return isInsideRectangle(this.columns, this.rows, x, y);
+    }
+
+    /**
+     * Directly draws a cell on the terminal using ANSI escape sequences,
+     * circumventing the drawing operation queue
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {Cell} cell
+     */
+    private renderCell(x: number, y: number, cell: Cell) {
+        const ESC = EscapeSequence.ESC;
+
+        const moveCursor = `${ESC}[${y + 1};${x + 1}f`;
+
+        let color = cell.fore;
+
+        let rgbString = this.renderMap.get(color);
+
+        if (rgbString == null) {
+            rgbString = `${color.r};${color.g};${color.b}`;
+            this.renderMap.set(color, rgbString);
+        }
+
+        const foregroundColor = `${ESC}[38;2;${rgbString}m`;
+
+        color = cell.back;
+
+        rgbString = this.renderMap.get(color);
+
+        if (rgbString == null) {
+            rgbString = `${color.r};${color.g};${color.b}`;
+            this.renderMap.set(color, rgbString);
+        }
+
+        const backgroundColor = `${ESC}[48;2;${rgbString}m`;
+
+        const reset = `${ESC}[0m`;
+
+        this.stdoutBuffer += `${foregroundColor}${backgroundColor}${moveCursor}${cell.char}${reset}`;
+    }
+
+    /**
+     * Sets a cell inside the terminal cell.
+     *
+     * This function adds a drawing operation to the queue, which will be processed
+     * and added to the stdout-buffer after the 'refresh' function is called.
+     *
+     * @param {number} x X-coordinate of the cell
+     * @param {number} y Y-coordinate of the cell
+     * @param {string} char A single character
+     * @param {Color} fore A foreground color
+     * @param {Color} back A background color
+     */
+    setCell(
+        column: number,
+        row: number,
+        char: string,
+        fore: Color = createColor(255, 255, 255),
+        back: Color = createColor(0, 0, 0)
+    ) {
+        this.cells[row][column].back = back;
+        this.cells[row][column].fore = fore;
+        this.cells[row][column].char = char;
+        this.cells[row][column].modified = true;
+    }
+
+    /**
+     * Sets the specified text onto to the terminal at the given row.
+     *
+     * This function adds multiple drawing operations to the queue, which will
+     * be processed and added to the stdout-buffer after the 'refresh' function
+     * is called.
+     *
+     * @param {number} row Y-position of the line
+     * @param {string} line Line to be written to terminal
+     * @param {Color} fore Foreground color
+     * @param {Color} back Background color
+     */
+    setRow(row: number, line: string, fore?: Color, back?: Color) {
+        if (row > this.rows - 1 || line.length > this.columns) {
+            return;
+        }
+
+        for (let x = 0; x < this.columns; x++) {
+            this.setCell(x, row, line[x], fore, back);
+        }
+    }
+
+    /**
+     * Writes the output buffer to the output stream.
+     */
+    async flush() {
+        await writeToStream(this.outputStream, this.stdoutBuffer);
+        this.stdoutBuffer = '';
+    }
+
+    /**
+     * Process all queued drawing operations and outputs the result to the screen
+     */
+    async refresh() {
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.columns; x++) {
+                const cell = this.cells[y][x];
+
+                if (cell.modified) {
+                    const currentCell = this.currentScreen[y][x];
+
+                    if (!compareCells(cell, currentCell)) {
+                        this.renderCell(x, y, cell);
+                        this.currentScreen[y][x].char = cell.char;
+                        this.currentScreen[y][x].fore = cell.fore;
+                        this.currentScreen[y][x].back = cell.back;
+                    }
+                    cell.modified = false;
+                }
+            }
+        }
+
+        await this.flush();
+    }
+}
