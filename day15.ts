@@ -141,7 +141,7 @@ export class Day15 extends AsyncDay<string[]> {
         return input
     }
 
-    dump(input: TInput): void {
+    async dump(input: TInput): Promise<void> {
         Console.goto(1, 1)
 
         for (let y = 0; y < input.map.height; y++) {
@@ -151,6 +151,7 @@ export class Day15 extends AsyncDay<string[]> {
             }
             console.log(`\r${line.join('')}`)
         }
+        await delay(5)
     }
 
     // Moves part 1 type of boxes or moves left/right complex boxes
@@ -326,11 +327,10 @@ export class Day15 extends AsyncDay<string[]> {
 
     async part2Async(data: string[]): Promise<number> {
         const input = this.parseData(data, true)
-        // this.dump(input)
+        // await this.dump(input)
         for (const move of input.moves) {
             this.moveRobot(input, directions[move])
-            // this.dump(input)
-            // await delay(5)
+            // await this.dump(input)
         }
         return await Promise.resolve(this.gps(input.map))
     }

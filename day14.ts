@@ -166,14 +166,18 @@ export class Day14 extends Day<TRobots> {
 
     lineIndexV(robots: TRobots): number {
         const groups: Set<number>[] = []
+        let index = 0
 
         robots.forEach(r => {
-            groups[r.position.x] ??= new Set()
-            groups[r.position.x].add(r.position.y)
+            let s = groups[r.position.x]
+            if (!s) {
+                s = new Set()
+                groups[r.position.x] = s
+            }
+            s.add(r.position.y)
+            index = Math.max(s.size, index)
         })
 
-        const indexes: number[] = groups.map(r => (r ? r.size : 0)).sort((r1, r2) => r2 - r1)
-        const index = indexes[0]
         return index
     }
 
@@ -232,4 +236,4 @@ export class Day14 extends Day<TRobots> {
     }
 }
 
-// new Day14().execute()
+new Day14().execute()
