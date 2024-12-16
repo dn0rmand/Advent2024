@@ -17,5 +17,6 @@
     "editor.formatOnPaste": true,
     "javascript.format.semicolons": "insert",
     "javascript.inlayHints.enumMemberValues.enabled": true,
-    "prettier.semi": false
+    "prettier.semi": false,
+    "terminal.integrated.tabs.enabled": true
 }

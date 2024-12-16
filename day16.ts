@@ -110,7 +110,8 @@ export class Day16 extends Day<TMap> {
         if (map.bestScore !== undefined) {
             return // already done
         }
-        const states: TReindeer[] = []
+
+        let states: TReindeer[] = []
         const visited: number[] = []
 
         const start = new TReindeer(map.start.x, map.start.y, Direction.EAST, 0)
@@ -122,12 +123,16 @@ export class Day16 extends Day<TMap> {
 
         while (states.length > 0) {
             const state = states.shift()!
+
             const k = state.key
 
             if (visited[k] !== undefined && visited[k] < state.score) {
                 continue // trash it
             }
             for (const newState of state.moves(map)) {
+                if (newState.score > bestScore) {
+                    continue // useless
+                }
                 const key = newState.key
                 const o = visited[key]
                 if (o !== undefined && o < newState.score) {
@@ -138,6 +143,7 @@ export class Day16 extends Day<TMap> {
                     if (newState.score < bestScore) {
                         bestScore = newState.score
                         paths = [newState]
+                        states = states.filter(s => s.score < bestScore)
                     } else if (newState.score === bestScore) {
                         paths.push(newState)
                     }
