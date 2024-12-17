@@ -1,6 +1,6 @@
 export class Console {
-    static prefix = '\x1b[';
-    static encoder: TextEncoder | undefined;
+    static prefix = '\x1b['
+    static encoder: TextEncoder | undefined
 
     static colors = {
         reset: 0,
@@ -51,77 +51,97 @@ export class Console {
         bgBrightMagenta: 105,
         bgBrightCyan: 106,
         bgBrightWhite: 107,
-    };
+    }
 
     static write(data: string) {
         if (Console.encoder === undefined) {
-            Console.encoder = new TextEncoder();
+            Console.encoder = new TextEncoder()
         }
-        const buffer = Console.encoder.encode(data);
+        const buffer = Console.encoder.encode(data)
 
-        Deno.stdout.writeSync(buffer);
+        Deno.stdout.writeSync(buffer)
     }
 
-    static savePosition(): void {
-        Console.write(Console.prefix + 's');
+    static showCursor(): void {
+        Console.write(Console.prefix + '?25h')
     }
 
-    static restorePosition(): void {
-        Console.write(Console.prefix + 'u');
+    static hideCursor(): void {
+        Console.write(Console.prefix + '?25l')
+    }
+
+    static saveCursor(): void {
+        Console.write(Console.prefix + 's')
+    }
+
+    static restoreCursor(): void {
+        Console.write(Console.prefix + 'u')
     }
 
     static up(num: number) {
-        Console.write(Console.prefix + (num || '') + 'A');
+        Console.write(Console.prefix + (num || '') + 'A')
     }
 
     static down(num: number) {
-        Console.write(Console.prefix + (num || '') + 'B');
+        Console.write(Console.prefix + (num || '') + 'B')
     }
 
     static forward(num: number) {
-        Console.write(Console.prefix + (num || '') + 'C');
+        Console.write(Console.prefix + (num || '') + 'C')
     }
 
     static back(num: number) {
-        Console.write(Console.prefix + (num || '') + 'D');
+        Console.write(Console.prefix + (num || '') + 'D')
     }
 
     static nextLine(num: number) {
-        Console.write(Console.prefix + (num || '') + 'E');
+        Console.write(Console.prefix + (num || '') + 'E')
     }
 
     static previousLine(num: number) {
-        Console.write(Console.prefix + (num || '') + 'F');
+        Console.write(Console.prefix + (num || '') + 'F')
     }
 
     static horizontalAbsolute(num: number) {
-        Console.write(Console.prefix + num + 'G');
+        Console.write(Console.prefix + num + 'G')
     }
 
-    static eraseData() {
-        Console.write(Console.prefix + 'J');
+    static clear() {
+        Console.write(Console.prefix + '2J')
+    }
+
+    static reset() {
+        Console.write(Console.prefix + '0m')
     }
 
     static eraseLine() {
-        Console.write(Console.prefix + 'K');
+        Console.write(Console.prefix + 'K')
     }
 
     static goto(x: number, y: number) {
-        Console.write(Console.prefix + y + ';' + x + 'H');
+        Console.write(Console.prefix + y + ';' + x + 'H')
     }
 
     static gotoSOL() {
-        Console.write('\r');
+        Console.write('\r')
     }
 
     static newLine() {
-        Console.write('\r\n');
+        Console.write('\r\n')
     }
 
     static color(color: string) {
-        const c = Console.colors[color];
+        const c = Console.colors[color]
         if (c) {
-            Console.write(Console.prefix + c + 'm');
+            Console.write(Console.prefix + c + 'm')
         }
+    }
+
+    static setForeground(r: number, g: number, b: number) {
+        Console.write(`${Console.prefix}38;2;${r};${g};${b}m`)
+    }
+
+    static seBackgroun(r: number, g: number, b: number) {
+        Console.write(`${Console.prefix}48;2;${r};${g};${b}m`)
     }
 }

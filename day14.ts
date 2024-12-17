@@ -1,5 +1,5 @@
 import { Day } from './tools/day.ts'
-import { modInv, modMul, chineseRemainder } from './tools/numberHelper.ts'
+import { chineseRemainder } from './tools/numberHelper.ts'
 
 type TPosition = {
     x: number
@@ -236,4 +236,4 @@ export class Day14 extends Day<TRobots> {
     }
 }
 
-new Day14().execute()
+// new Day14().execute()
