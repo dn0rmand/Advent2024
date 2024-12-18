@@ -1,6 +1,8 @@
-import { delay } from '@std/async'
 import { AsyncDay } from './tools/day.ts'
-import { Console } from './tools/console.ts'
+import { Color, white, black } from './tools/console.ts'
+import { Screen } from './tools/screen.ts'
+
+const ANIMATE = Deno.mainModule.endsWith('day15.ts')
 
 enum MOVES {
     NONE = 0,
@@ -16,6 +18,7 @@ enum ITEM {
     BOX = 2,
     BOXL = 3,
     BOXR = 4,
+    ROBOT = 5,
 }
 
 type TRobot = {
@@ -46,7 +49,18 @@ type TInput = {
     moves: MOVES[]
 }
 
-const items = ['.', '#', 'O', '[', ']']
+const items = [' ', '█', 'O', '[', ']', '⍾']
+const red: Color = { R: 255, G: 0, B: 0 }
+const green: Color = { R: 0, G: 255, B: 0 }
+
+const itemColors = [
+    { foreground: white, background: black }, // Empty space
+    { foreground: white, background: black }, // Wall
+    { foreground: white, background: black }, // Box
+    { foreground: green, background: black }, // Box Left
+    { foreground: green, background: black }, // Box Right
+    { foreground: red, background: black }, // Robot
+]
 
 const directions: TDirection[] = [
     { dx: 0, dy: 0 }, // NONE
@@ -57,8 +71,11 @@ const directions: TDirection[] = [
 ]
 
 export class Day15 extends AsyncDay<string[]> {
+    screen: Screen
+
     constructor() {
         super(15)
+        this.screen = new Screen(100, 50)
     }
 
     loadInput(): string[] {
@@ -142,16 +159,18 @@ export class Day15 extends AsyncDay<string[]> {
     }
 
     async dump(input: TInput): Promise<void> {
-        Console.goto(1, 1)
-
+        this.screen.clear()
         for (let y = 0; y < input.map.height; y++) {
-            const line = input.map.items[y].map(i => items[i])
-            if (input.robot.y === y) {
-                line[input.robot.x] = '@'
+            for (let x = 0; x < input.map.width; x++) {
+                const item = input.map.items[y][x]
+                const { foreground, background } = itemColors[item]
+                this.screen.setCell(x, y, items[item], foreground, background)
             }
-            console.log(`\r${line.join('')}`)
         }
-        await delay(5)
+        const { foreground, background } = itemColors[ITEM.ROBOT]
+        this.screen.setCell(input.robot.x, input.robot.y, items[ITEM.ROBOT], foreground, background)
+        await this.screen.render()
+        // await delay(0)
     }
 
     // Moves part 1 type of boxes or moves left/right complex boxes
@@ -327,13 +346,19 @@ export class Day15 extends AsyncDay<string[]> {
 
     async part2Async(data: string[]): Promise<number> {
         const input = this.parseData(data, true)
-        // await this.dump(input)
+        if (ANIMATE) {
+            await this.dump(input)
+        }
         for (const move of input.moves) {
             this.moveRobot(input, directions[move])
-            // await this.dump(input)
+            if (ANIMATE) {
+                await this.dump(input)
+            }
         }
         return await Promise.resolve(this.gps(input.map))
     }
 }
 
-// await new Day15().executeAsync()
+if (ANIMATE) {
+    await new Day15().executeAsync()
+}

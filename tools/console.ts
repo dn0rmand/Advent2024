@@ -1,3 +1,21 @@
+export type Color = {
+    R: number
+    G: number
+    B: number
+}
+
+export const black: Color = {
+    R: 30,
+    G: 30,
+    B: 30,
+}
+
+export const white: Color = {
+    R: 255,
+    G: 255,
+    B: 255,
+}
+
 export class Console {
     static prefix = '\x1b['
     static encoder: TextEncoder | undefined
@@ -53,95 +71,104 @@ export class Console {
         bgBrightWhite: 107,
     }
 
-    static write(data: string) {
+    static async write(data: string): Promise<void> {
         if (Console.encoder === undefined) {
             Console.encoder = new TextEncoder()
         }
         const buffer = Console.encoder.encode(data)
 
-        Deno.stdout.writeSync(buffer)
+        await Deno.stdout.write(buffer)
     }
 
-    static showCursor(): void {
-        Console.write(Console.prefix + '?25h')
+    static async showCursor(): Promise<void> {
+        await Console.write(Console.prefix + '?25h')
     }
 
-    static hideCursor(): void {
-        Console.write(Console.prefix + '?25l')
+    static async hideCursor(): Promise<void> {
+        await Console.write(Console.prefix + '?25l')
     }
 
-    static saveCursor(): void {
-        Console.write(Console.prefix + 's')
+    static async saveCursor(): Promise<void> {
+        await Console.write(Console.prefix + 's')
     }
 
-    static restoreCursor(): void {
-        Console.write(Console.prefix + 'u')
+    static async restoreCursor(): Promise<void> {
+        await Console.write(Console.prefix + 'u')
     }
 
-    static up(num: number) {
-        Console.write(Console.prefix + (num || '') + 'A')
+    static async up(num: number): Promise<void> {
+        await Console.write(Console.prefix + (num || '') + 'A')
     }
 
-    static down(num: number) {
-        Console.write(Console.prefix + (num || '') + 'B')
+    static async down(num: number): Promise<void> {
+        await Console.write(Console.prefix + (num || '') + 'B')
     }
 
-    static forward(num: number) {
-        Console.write(Console.prefix + (num || '') + 'C')
+    static async forward(num: number): Promise<void> {
+        await Console.write(Console.prefix + (num || '') + 'C')
     }
 
-    static back(num: number) {
-        Console.write(Console.prefix + (num || '') + 'D')
+    static async back(num: number): Promise<void> {
+        await Console.write(Console.prefix + (num || '') + 'D')
     }
 
-    static nextLine(num: number) {
-        Console.write(Console.prefix + (num || '') + 'E')
+    static async nextLine(num: number): Promise<void> {
+        await Console.write(Console.prefix + (num || '') + 'E')
     }
 
-    static previousLine(num: number) {
-        Console.write(Console.prefix + (num || '') + 'F')
+    static async previousLine(num: number): Promise<void> {
+        await Console.write(Console.prefix + (num || '') + 'F')
     }
 
-    static horizontalAbsolute(num: number) {
-        Console.write(Console.prefix + num + 'G')
+    static async horizontalAbsolute(num: number): Promise<void> {
+        await Console.write(Console.prefix + num + 'G')
     }
 
-    static clear() {
-        Console.write(Console.prefix + '2J')
+    static async clear(): Promise<void> {
+        await Console.write(Console.prefix + '3J')
+        await Console.write(Console.prefix + '2J')
     }
 
-    static reset() {
-        Console.write(Console.prefix + '0m')
+    static async clearFromCursor(): Promise<void> {
+        Console.write(Console.prefix + '0J')
     }
 
-    static eraseLine() {
-        Console.write(Console.prefix + 'K')
+    static async clearToCursor(): Promise<void> {
+        await Console.write(Console.prefix + '1J')
     }
 
-    static goto(x: number, y: number) {
-        Console.write(Console.prefix + y + ';' + x + 'H')
+    static async reset(): Promise<void> {
+        await Console.write(Console.prefix + '0m')
     }
 
-    static gotoSOL() {
-        Console.write('\r')
+    static async eraseLine(): Promise<void> {
+        await Console.write(Console.prefix + 'K')
     }
 
-    static newLine() {
-        Console.write('\r\n')
+    static async goto(x: number, y: number): Promise<void> {
+        await Console.write(Console.prefix + y + ';' + x + 'H')
     }
 
-    static color(color: string) {
+    static async gotoSOL(): Promise<void> {
+        await Console.write('\r')
+    }
+
+    static async newLine(): Promise<void> {
+        await Console.write('\r\n')
+    }
+
+    static async color(color: string): Promise<void> {
         const c = Console.colors[color]
         if (c) {
-            Console.write(Console.prefix + c + 'm')
+            await Console.write(Console.prefix + c + 'm')
         }
     }
 
-    static setForeground(r: number, g: number, b: number) {
-        Console.write(`${Console.prefix}38;2;${r};${g};${b}m`)
+    static async setForeground(color: Color): Promise<void> {
+        await Console.write(`${Console.prefix}38;2;${color.R};${color.G};${color.B}m`)
     }
 
-    static seBackgroun(r: number, g: number, b: number) {
-        Console.write(`${Console.prefix}48;2;${r};${g};${b}m`)
+    static async setBackground(color: Color): Promise<void> {
+        await Console.write(`${Console.prefix}48;2;${color.R};${color.G};${color.B}m`)
     }
 }
