@@ -17,7 +17,7 @@ import { Day15 } from './day15.ts'
 import { Day16 } from './day16.ts'
 import { Day17 } from './day17.ts'
 import { Day18 } from './day18.ts'
-// import { Day19 } from './day19.ts';
+import { Day19 } from './day19.ts'
 // import { Day20 } from './day20.ts';
 // import { Day21 } from './day21.ts';
 // import { Day22 } from './day22.ts';
@@ -44,7 +44,7 @@ const days: IDay[] = [
     new Day16(),
     new Day17(),
     new Day18(),
-    // new Day19(),
+    new Day19(),
     // new Day20(),
     // new Day21(),
     // new Day22(),

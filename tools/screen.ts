@@ -10,7 +10,7 @@ export class Screen {
     width: number
     height: number
     buffer: Cell[][]
-    colors: Color[]
+    keys: Uint8Array = new Uint8Array(1)
 
     constructor(width: number, height: number) {
         this.width = width
@@ -21,13 +21,22 @@ export class Screen {
             this.buffer[y].fill({ value: ' ', foreground: white, background: black })
         }
 
+        Deno.stdin.setRaw(true)
         Console.hideCursor()
+    }
+
+    async keypressed(): Promise<number> {
+        if ((await Deno.stdin.read(this.keys)) === 1) {
+            return this.keys[0]
+        }
+        return 0
     }
 
     async close(): Promise<void> {
         await Console.goto(1, 1)
         await Console.clear()
         await Console.showCursor()
+        Deno.stdin.setRaw(false)
     }
 
     sameColor(c1: Color, c2: Color): boolean {

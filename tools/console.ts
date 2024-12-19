@@ -71,6 +71,15 @@ export class Console {
         bgBrightWhite: 107,
     }
 
+    static writeSync(data: string): void {
+        if (Console.encoder === undefined) {
+            Console.encoder = new TextEncoder()
+        }
+        const buffer = Console.encoder.encode(data)
+
+        Deno.stdout.writeSync(buffer)
+    }
+
     static async write(data: string): Promise<void> {
         if (Console.encoder === undefined) {
             Console.encoder = new TextEncoder()

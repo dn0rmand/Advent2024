@@ -1,8 +1,9 @@
 import { AsyncDay } from './tools/day.ts'
 import { Color, white, black } from './tools/console.ts'
 import { Screen } from './tools/screen.ts'
+import { delay } from './tools/terminal/util.ts'
 
-const ANIMATE = Deno.mainModule.endsWith('day15.ts')
+let ANIMATE = Deno.mainModule.endsWith('day15.ts')
 
 enum MOVES {
     NONE = 0,
@@ -71,11 +72,13 @@ const directions: TDirection[] = [
 ]
 
 export class Day15 extends AsyncDay<string[]> {
-    screen: Screen
+    screen: Screen | undefined
 
     constructor() {
         super(15)
-        this.screen = new Screen(100, 50)
+        if (ANIMATE) {
+            this.screen = new Screen(100, 50)
+        }
     }
 
     loadInput(): string[] {
@@ -349,13 +352,43 @@ export class Day15 extends AsyncDay<string[]> {
         if (ANIMATE) {
             await this.dump(input)
         }
+        let SPEED = 5
+        let step = 0
         for (const move of input.moves) {
             this.moveRobot(input, directions[move])
             if (ANIMATE) {
-                await this.dump(input)
+                if (++step === SPEED) {
+                    step = 0
+                    await this.dump(input)
+                }
+                const key = await this.screen.keypressed()
+                if (key !== 0) {
+                    switch (String.fromCharCode(key)) {
+                        case 'q':
+                            ANIMATE = false
+                            break
+                        case '-':
+                            if (SPEED > 1) {
+                                SPEED--
+                            }
+                            break
+                        case '+':
+                            if (SPEED < 100) {
+                                SPEED++
+                            }
+                            break
+                        case ' ':
+                            await delay(10000)
+                            break
+                    }
+                }
             }
         }
-        return await Promise.resolve(this.gps(input.map))
+        const result = await Promise.resolve(this.gps(input.map))
+        if (ANIMATE) {
+            this.screen.close()
+        }
+        return result
     }
 }
 
