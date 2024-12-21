@@ -18,14 +18,14 @@ import { Day16 } from './day16.ts'
 import { Day17 } from './day17.ts'
 import { Day18 } from './day18.ts'
 import { Day19 } from './day19.ts'
-// import { Day20 } from './day20.ts';
-// import { Day21 } from './day21.ts';
-// import { Day22 } from './day22.ts';
-// import { Day23 } from './day23.ts';
-// import { Day24 } from './day24.ts';
-// import { Day25 } from './day25.ts';
+import { Day20 } from './day20.ts'
+import { Day21 } from './day21.ts'
+import { Day22 } from './day22.ts'
+import { Day23 } from './day23.ts'
+import { Day24 } from './day24.ts'
+import { Day25 } from './day25.ts'
 
-const REPEATS = 10
+const REPEATS = 1
 
 const days: IDay[] = [
     new Day1(),
@@ -47,12 +47,12 @@ const days: IDay[] = [
     new Day17(),
     new Day18(),
     new Day19(),
-    // new Day20(),
-    // new Day21(),
-    // new Day22(),
-    // new Day23(),
-    // new Day24(),
-    // new Day25(),
+    new Day20(),
+    new Day21(),
+    new Day22(),
+    new Day23(),
+    new Day24(),
+    new Day25(),
 ]
 
 type TimeEntry = {

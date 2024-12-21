@@ -15,8 +15,8 @@ export class Day25 extends Day<TInput> {
         return 0
     }
 
-    part2(input: TInput): number {
-        return 0
+    part2(input: TInput): string {
+        return 'Merry Christmas'
     }
 }
 

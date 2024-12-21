@@ -148,4 +148,4 @@ export class Day20 extends Day<TMap> {
     }
 }
 
-new Day20().execute()
+// new Day20().execute()
