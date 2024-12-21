@@ -50,25 +50,21 @@ export class Day19 extends Day<TInput> {
     }
 
     part1(input: TInput): number {
-        let possible = 0
-        for (let i = 0; i < input.designs.length; i++) {
-            const design = input.designs[i]
+        const possible = input.designs.reduce((p, design) => {
             const patterns = input.patterns.filter(p => design.indexOf(p) >= 0)
+            let o = 0
             if (!this.canEnd(patterns, design)) {
                 this.memoize.set(design, 0)
             } else if (this.findDesign(patterns, design) > 0) {
-                possible++
+                o = 1
             }
-        }
+            return p + o
+        }, 0)
         return possible
     }
 
     part2(input: TInput): number {
-        let total = 0
-        for (let i = 0; i < input.designs.length; i++) {
-            const design = input.designs[i]
-            total += this.findDesign(input.patterns, design)
-        }
+        const total = input.designs.reduce((t, design) => t + this.findDesign(input.patterns, design), 0)
         return total
     }
 }
