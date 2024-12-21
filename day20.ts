@@ -15,6 +15,12 @@ type TDirection = {
     dy: number
 }
 
+type TPoint = {
+    x: number
+    y: number
+    time: number
+}
+
 const directions: TDirection[] = [
     { dx: 0, dy: -1 }, // UP
     { dx: 0, dy: 1 }, // DOWN
@@ -30,63 +36,10 @@ type TMap = {
     end: TPosition
 }
 
-class State {
-    position: TPosition
-    time: number
-    key: number
-    ghost: boolean
-
-    static makeKey({ x, y }: TPosition): number {
-        return x + 150 * y
-    }
-
-    static fromKey(key: number): TPosition {
-        const x = key % 150
-        const y = (key - x) / 150
-
-        return { x, y }
-    }
-
-    constructor(position: TPosition, time: number, ghost: boolean) {
-        this.position = position
-        this.time = time
-        this.ghost = ghost
-        this.key = State.makeKey(this.position)
-    }
-
-    static getItem(map: TMap, x: number, y: number, ghost: boolean): ITEM | undefined {
-        if (x <= 0 || y <= 0 || x >= map.width - 1 || y >= map.height - 1) {
-            return undefined
-        }
-
-        return ghost ? ITEM.EMPTY : map.items[y][x]
-    }
-
-    create(map: TMap, dx: number, dy: number): State | undefined {
-        const x = this.position.x + dx
-        const y = this.position.y + dy
-        const item = State.getItem(map, x, y, this.ghost)
-        if (item !== ITEM.EMPTY) {
-            return undefined
-        }
-        return new State({ x, y }, this.time + 1, this.ghost)
-    }
-
-    moves(map: TMap): State[] {
-        const newStates: State[] = []
-
-        for (const { dx, dy } of directions) {
-            const newState = this.create(map, dx, dy)
-            if (newState) {
-                newStates.push(newState)
-            }
-        }
-
-        return newStates
-    }
-}
-
 export class Day20 extends Day<TMap> {
+    path?: TPoint[]
+    indexes?: TPoint[][]
+
     constructor() {
         super(20)
     }
@@ -118,94 +71,66 @@ export class Day20 extends Day<TMap> {
         return input
     }
 
-    findMaxTimePath(map: TMap): Map<number, number> {
-        const states: State[] = [new State(map.start, 0, false)]
-        const path: Map<number, number> = new Map()
+    calculatePath(map: TMap): void {
+        if (!this.path) {
+            this.path = []
+            this.indexes = []
 
-        path.set(State.makeKey(map.start), 0)
+            let current = map.start
+            let previous = map.start
+            let time = 0
+            this.indexes[map.start.y] = []
+            this.indexes[map.end.y] = []
+            while (current.x !== map.end.x || current.y !== map.end.y) {
+                const point: TPoint = { x: current.x, y: current.y, time }
+                this.path.push(point)
+                this.indexes[current.y].push(point)
+                time++
 
-        while (states.length > 0) {
-            const state = states.pop()!
-
-            for (const newState of state.moves(map)) {
-                const key = newState.key
-                if (path.has(key)) {
-                    continue
-                }
-                path.set(key, newState.time)
-                if (newState.position.x === map.end.x && newState.position.y === map.end.y) {
-                    return path
-                }
-                states.push(newState)
-            }
-        }
-        throw 'Could not find exit'
-    }
-
-    shortCuts(map: TMap, path: Map<number, number>, start: number, distance: number): Map<number, number> {
-        const { x, y } = State.fromKey(start)
-        const startTime = path.get(start)!
-
-        let states: Map<number, State> = new Map()
-        let newStates: Map<number, State> = new Map()
-
-        const ends: Map<number, number> = new Map()
-        const visited: number[] = []
-
-        const startState = new State({ x, y }, startTime, true)
-        states.set(startState.key, startState)
-        visited[startState.key] = 1
-
-        const maxTime = startTime + distance
-        while (states.size > 0) {
-            newStates.clear()
-
-            for (const state of states.values()) {
-                if (state.time >= maxTime) {
-                    continue
-                }
-                for (const newState of state.moves(map)) {
-                    const key = newState.key
-                    if (visited[key]) {
-                        continue
+                for (const { dx, dy } of directions) {
+                    const x = current.x + dx
+                    const y = current.y + dy
+                    if (map.items[y][x] === ITEM.EMPTY && (x !== previous.x || y !== previous.y)) {
+                        previous = current
+                        current = { x, y }
+                        this.indexes[y] ??= []
+                        break
                     }
-                    visited[key] = 1
-
-                    const endTime = path.get(key)
-                    if (endTime !== undefined && newState.time < endTime) {
-                        const saved = endTime - newState.time
-                        const oldSaved = ends.get(key)
-                        if (oldSaved === undefined || saved > oldSaved) {
-                            ends.set(key, saved)
-                        }
-                    }
-
-                    // if (newState.position.x !== map.end.x || newState.position.y !== map.end.y) {
-                    newStates.set(key, newState)
-                    // }
                 }
             }
 
-            const tmp = states
-            states = newStates
-            newStates = tmp
+            const point: TPoint = { x: current.x, y: current.y, time }
+            this.path.push(point)
+            this.indexes[current.y].push(point)
+            this.indexes.forEach(pts => {
+                if (pts) {
+                    pts.sort((a, b) => a.x - b.x)
+                }
+            })
         }
-
-        return ends
     }
 
     findCheats(map: TMap, distance: number): number {
-        const path = this.findMaxTimePath(map)
+        this.calculatePath(map)
+
+        const path = this.path!
+        const indexes = this.indexes!
 
         let cheats = 0
 
-        for (const start of path.keys()) {
-            const shortCuts: number[] = []
-            for (const [end, saved] of this.shortCuts(map, path, start, distance)) {
-                if (saved >= 100 && !shortCuts[end]) {
-                    shortCuts[end] = 1
-                    cheats++
-                }
+        for (let i = 0; i < path.length; i++) {
+            const { x: x0, y: y0, time: startTime } = path[i]
+
+            for (let y = Math.max(1, y0 - distance); y <= Math.min(map.height - 2, y0 + distance); y++) {
+                const points = indexes[y]
+                cheats += points.reduce((count, { x: x1, y: y1, time: endTime }) => {
+                    const d = Math.abs(x0 - x1) + Math.abs(y0 - y1)
+                    if (d > distance) {
+                        return count
+                    }
+                    const newEndTime = startTime + d
+                    return count + (endTime - newEndTime >= 100 ? 1 : 0)
+                }, 0)
             }
         }
 
@@ -213,11 +138,13 @@ export class Day20 extends Day<TMap> {
     }
 
     part1(map: TMap): number {
-        return this.findCheats(map, 2)
+        const cheats = this.findCheats(map, 2)
+        return cheats
     }
 
     part2(map: TMap): number {
-        return this.findCheats(map, 20)
+        const cheats = this.findCheats(map, 20)
+        return cheats
     }
 }
 
