@@ -25,7 +25,7 @@ import { Day23 } from './day23.ts'
 import { Day24 } from './day24.ts'
 import { Day25 } from './day25.ts'
 
-const REPEATS = 1
+const REPEATS = 10
 
 const days: IDay[] = [
     new Day1(),
