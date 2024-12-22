@@ -1,5 +1,7 @@
 import { Day } from './tools/day.ts'
 
+const MAX_KEY = 150 * 150 * 10
+
 enum Direction {
     EAST = 0,
     SOUTH = 1,
@@ -31,12 +33,12 @@ type TMap = {
     height: number
     start: TPosition
     end: TPosition
-    bestScore: number | undefined
-    paths: TReindeer[] | undefined
+    bestScore?: number
+    paths?: TReindeer[]
 }
 
 class TReindeer {
-    previous: TReindeer | undefined
+    previous?: TReindeer
     x: number
     y: number
     direction: Direction
@@ -75,6 +77,8 @@ class TReindeer {
 }
 
 export class Day16 extends Day<TMap> {
+    visited: Uint32Array = new Uint32Array(MAX_KEY)
+
     constructor() {
         super(16)
     }
@@ -112,11 +116,11 @@ export class Day16 extends Day<TMap> {
         }
 
         let states: TReindeer[] = []
-        const visited: number[] = []
+        this.visited.fill(-1)
 
         const start = new TReindeer(map.start.x, map.start.y, Direction.EAST, 0)
         states.push(start)
-        visited[start.key] = 0
+        this.visited[start.key] = 0
 
         let bestScore = Number.MAX_SAFE_INTEGER
         let paths: TReindeer[] = []
@@ -126,7 +130,7 @@ export class Day16 extends Day<TMap> {
 
             const k = state.key
 
-            if (visited[k] !== undefined && visited[k] < state.score) {
+            if (this.visited[k] >= 0 && this.visited[k] < state.score) {
                 continue // trash it
             }
             for (const newState of state.moves(map)) {
@@ -134,11 +138,11 @@ export class Day16 extends Day<TMap> {
                     continue // useless
                 }
                 const key = newState.key
-                const o = visited[key]
-                if (o !== undefined && o < newState.score) {
+                const o = this.visited[key]
+                if (o >= 0 && o < newState.score) {
                     continue
                 }
-                visited[key] = newState.score
+                this.visited[key] = newState.score
                 if (newState.x === map.end.x && newState.y === map.end.y) {
                     if (newState.score < bestScore) {
                         bestScore = newState.score
@@ -158,14 +162,14 @@ export class Day16 extends Day<TMap> {
     }
 
     countSeats(paths: TReindeer[]): number {
-        const visited: number[] = []
+        this.visited.fill(0)
 
         const seats = paths.reduce((seats, state) => {
             let current: TReindeer | undefined = state
             while (current !== undefined) {
                 const k = current.x + current.y * 150
-                if (!visited[k]) {
-                    visited[k] = 1
+                if (!this.visited[k]) {
+                    this.visited[k] = 1
                     seats++
                 }
                 current = current.previous
