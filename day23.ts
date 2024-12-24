@@ -60,6 +60,7 @@ export class Day23 extends Day<void> {
         if (max <= this.bestSet.length) {
             return
         }
+
         const key = used.sort((a, b) => a.localeCompare(b)).join(':')
         if (this.$visited.has(key)) {
             return

@@ -24,8 +24,9 @@ import { Day22 } from './day22.ts'
 import { Day23 } from './day23.ts'
 import { Day24 } from './day24.ts'
 import { Day25 } from './day25.ts'
+import { filter } from 'https://deno.land/x/cursed@0.0.5/mod.ts'
 
-const REPEATS = 10
+const REPEATS = 1
 
 const days: IDay[] = [
     new Day1(),
@@ -117,16 +118,20 @@ async function executeAll() {
     }
     console.timeLog('@advent-2024', 'to execute them all')
 
-    output('')
-    output(times['@advent-2024'].message)
+    output('\r')
     times['@advent-2024'].duration = 0 // For the sorting
 
-    const order = Object.values(times).sort((a: TimeEntry, b: TimeEntry) => compare(b, a))
+    const order = Object.keys(times)
+        .filter(k => k !== '@advent-2024')
+        .filter(k => times[k].duration > 10)
+        .sort((a: string, b: string) => compare(times[b], times[a]))
 
-    output(`Slowest: ${order[0].message}`)
-    for (const key in times) {
+    for (const key of order) {
         output(times[key].message)
     }
+
+    output('\r')
+    output(times['@advent-2024'].message)
 }
 
 await executeAll()
