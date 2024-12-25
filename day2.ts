@@ -1,80 +1,80 @@
-import { Day } from './tools/day.ts';
+import { Day } from './tools/day.ts'
 
-type TInput = number[][];
+type TInput = number[][]
 
 export class Day2 extends Day<TInput> {
     constructor() {
-        super(2);
+        super(2)
     }
 
     loadInput(): TInput {
-        const data = this.readDataFile();
+        const data = this.readDataFile()
 
-        const r: TInput = [];
+        const r: TInput = []
 
         for (const line of data) {
-            const values = line.split(' ').map(v => +v);
-            r.push(values);
+            const values = line.split(' ').map(v => +v)
+            r.push(values)
         }
 
-        return r;
+        return r
     }
 
     isSafe(values: number[]): boolean {
-        let previous = values[0];
-        const direction = values[1] - previous;
+        let previous = values[0]
+        const direction = values[1] - previous
         if (direction === 0) {
-            return false;
+            return false
         }
         for (let i = 1; i < values.length; i++) {
-            const current = values[i];
-            const d = current - previous;
+            const current = values[i]
+            const d = current - previous
             if (d === 0) {
-                return false;
+                return false
             }
             if (d === 0 || d * direction < 0 || Math.abs(d) > 3) {
-                return false;
+                return false
             }
-            previous = current;
+            previous = current
         }
-        return true;
+        return true
     }
 
     isSafe2(values: number[]): boolean {
         if (this.isSafe(values)) {
-            return true;
+            return true
         }
         for (let i = 0; i < values.length; i++) {
-            const vals = values.filter((_, idx) => idx !== i);
+            const vals = values.filter((_, idx) => idx !== i)
             if (this.isSafe(vals)) {
-                return true;
+                return true
             }
         }
-        return false;
+        return false
     }
 
     part1(input: TInput): number {
-        let total = 0;
+        let total = 0
 
         for (const values of input) {
             if (this.isSafe(values)) {
-                total++;
+                total++
             }
         }
 
-        return total;
+        return total
     }
 
     part2(input: TInput): number {
-        let total = 0;
+        let total = 0
 
         for (const values of input) {
             if (this.isSafe2(values)) {
-                total++;
+                total++
             }
         }
 
-        return total;
+        return total
     }
 }
 

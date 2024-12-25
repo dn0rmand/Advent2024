@@ -1,23 +1,5 @@
 import { Day } from './tools/day.ts'
 
-enum OPCODE {
-    ADV = 0,
-    BXL = 1,
-    BST = 2,
-    JNZ = 3,
-    BXC = 4,
-    OUT = 5,
-    BDV = 6,
-    CDV = 7,
-}
-
-type TContext = {
-    program: number[]
-    best: number
-    xor3: number
-    xor5: number
-}
-
 type TInput = {
     A: number
     B: number
@@ -125,7 +107,7 @@ export class Day17 extends Day<TInput> {
         return output.join(',')
     }
 
-    part2(input: TInput): string {
+    part2(_: TInput): string {
         const a = this.findA(0, this.program.length)
         return `${a}`
     }

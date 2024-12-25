@@ -162,18 +162,20 @@ export class Day15 extends AsyncDay<string[]> {
     }
 
     async dump(input: TInput): Promise<void> {
-        this.screen.clear()
-        for (let y = 0; y < input.map.height; y++) {
-            for (let x = 0; x < input.map.width; x++) {
-                const item = input.map.items[y][x]
-                const { foreground, background } = itemColors[item]
-                this.screen.setCell(x, y, items[item], foreground, background)
+        if (this.screen) {
+            this.screen.clear()
+            for (let y = 0; y < input.map.height; y++) {
+                for (let x = 0; x < input.map.width; x++) {
+                    const item = input.map.items[y][x]
+                    const { foreground, background } = itemColors[item]
+                    this.screen.setCell(x, y, items[item], foreground, background)
+                }
             }
+            const { foreground, background } = itemColors[ITEM.ROBOT]
+            this.screen.setCell(input.robot.x, input.robot.y, items[ITEM.ROBOT], foreground, background)
+            await this.screen.render()
+            // await delay(0)
         }
-        const { foreground, background } = itemColors[ITEM.ROBOT]
-        this.screen.setCell(input.robot.x, input.robot.y, items[ITEM.ROBOT], foreground, background)
-        await this.screen.render()
-        // await delay(0)
     }
 
     // Moves part 1 type of boxes or moves left/right complex boxes
@@ -361,7 +363,7 @@ export class Day15 extends AsyncDay<string[]> {
                     step = 0
                     await this.dump(input)
                 }
-                const key = await this.screen.keypressed()
+                const key = await this.screen!.keypressed()
                 if (key !== 0) {
                     switch (String.fromCharCode(key)) {
                         case 'q':
@@ -385,8 +387,8 @@ export class Day15 extends AsyncDay<string[]> {
             }
         }
         const result = await Promise.resolve(this.gps(input.map))
-        if (ANIMATE) {
-            this.screen.close()
+        if (this.screen) {
+            this.screen!.close()
         }
         return result
     }

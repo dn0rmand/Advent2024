@@ -1,10 +1,5 @@
 import { Day } from './tools/day.ts'
 
-type TInput = {
-    keys: number[][]
-    locks: number[][]
-}
-
 export class Day25 extends Day<void> {
     locks: number[][] = []
     keys: number[][] = []
