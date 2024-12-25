@@ -123,4 +123,4 @@ export class Day23 extends Day<void> {
     }
 }
 
-new Day23().execute()
+// new Day23().execute()
