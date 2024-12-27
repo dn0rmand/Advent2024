@@ -28,7 +28,7 @@ export class Day24 extends Day<void> {
     cache: { [key: string]: number } = {}
 
     constructor() {
-        super(24)
+        super(24, 'Crossed Wires')
     }
 
     loadInput(): void {
@@ -243,6 +243,8 @@ export class Day24 extends Day<void> {
     }
 
     part2(): string {
+        this.swaps = []
+
         if (!this.isFirstValid(this.zNames[0])) {
             throw 'Input not supported as of now'
         }

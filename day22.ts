@@ -12,7 +12,7 @@ export class Day22 extends Day<number[]> {
     max: number = 0
 
     constructor() {
-        super(22)
+        super(22, 'Monkey Market')
     }
 
     loadInput(): number[] {

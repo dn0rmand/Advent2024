@@ -179,7 +179,7 @@ class FileMap {
 
 export class Day9 extends Day<string> {
     constructor() {
-        super(9)
+        super(9, 'Disk Fragmenter')
     }
 
     loadInput(): string {

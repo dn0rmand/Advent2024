@@ -9,7 +9,7 @@ type Equations = Equation[]
 
 export class Day7 extends Day<Equations> {
     constructor() {
-        super(7)
+        super(7, 'Bridge Repair')
     }
 
     loadInput(): Equations {

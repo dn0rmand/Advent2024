@@ -13,7 +13,7 @@ export class Day17 extends Day<TInput> {
     best: number = Number.MAX_SAFE_INTEGER
 
     constructor() {
-        super(17)
+        super(17, 'Chronospatial Computer')
     }
 
     loadInput(): TInput {

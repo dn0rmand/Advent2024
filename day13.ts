@@ -23,7 +23,7 @@ export class Day13 extends Day<TInput> {
     static prizeSearch: RegExp = /(?:Prize: X=)(\d*)(?:, Y=)(\d*)/g
 
     constructor() {
-        super(13)
+        super(13, 'Claw Contraption')
     }
 
     parseButton(data: string): TButton {

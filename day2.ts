@@ -4,7 +4,7 @@ type TInput = number[][]
 
 export class Day2 extends Day<TInput> {
     constructor() {
-        super(2)
+        super(2, 'Red-Nosed Reports')
     }
 
     loadInput(): TInput {

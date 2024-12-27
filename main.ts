@@ -24,9 +24,6 @@ import { Day22 } from './day22.ts'
 import { Day23 } from './day23.ts'
 import { Day24 } from './day24.ts'
 import { Day25 } from './day25.ts'
-import { filter } from 'https://deno.land/x/cursed@0.0.5/mod.ts'
-
-const REPEATS = 1
 
 const days: IDay[] = [
     new Day1(),
@@ -70,7 +67,10 @@ function compare(a: TimeEntry, b: TimeEntry): number {
 const output = console.log
 
 console.debug = () => {}
-console.log = () => {}
+
+const dayLog = (buffer: string[]) => (msg: string) => {
+    buffer.push(msg)
+}
 
 console.time = (key: string) => {
     if (key[0] == '@') {
@@ -82,43 +82,60 @@ console.timeLog = (key: string, msg: string) => {
     if (key[0] == '@') {
         performance.mark(key + '$end')
         const t = performance.measure(key, key + '$start', key + '$end')
-        let duration = t.duration
-        if (key === '@advent-2024') {
-            duration /= REPEATS
-        }
         times[key] = {
-            duration: duration,
-            message: `${duration.toFixed(5)}ms ${msg}`,
+            duration: t.duration,
+            message: `${t.duration.toFixed(5)}ms ${msg}`,
         }
     }
 }
 
-async function executeAll() {
-    output('***************************')
-    output('*** Advent of Code 2024 ***')
-    output('***************************')
-    output('')
+function format(value: string | number, length: number, direction: 'L' | 'R' = 'R') {
+    const s = `${value}`
+    if (s.length < length) {
+        return direction === 'L' ? ' '.repeat(length - s.length) + s : s + ' '.repeat(length - s.length)
+        return
+    } else {
+        return s.substring(0, length)
+    }
+}
 
+async function executeAll() {
     console.time('@advent-2024')
-    for (let repeat = 1; repeat <= REPEATS; repeat++) {
-        if (repeat === REPEATS) {
-            console.log = output
+
+    output('┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐')
+    output('│ 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄  ADVENT OF CODE 2024  🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 🎅🏻 🎄 │')
+    output('├─────┬───────────────────────────┬──────────────────────┬──────────────────────────────────────────┬─────────────┤')
+    output('│ Day │ Title                     │ Part 1               │ Part 2                                   │ Time in ms  │')
+
+    for (const day of days) {
+        const lines: string[] = []
+        console.log = dayLog(lines)
+        const key = `@day${day.day}`
+        const msg = `to execute both parts of day ${day.day}`
+        console.time(key)
+        if (day.isAsync) {
+            await day.executeAsync()
+        } else {
+            day.execute()
         }
-        for (const day of days) {
-            const key = `@day${day.day}`
-            const msg = `to execute both parts of day ${day.day}`
-            console.time(key)
-            if (day.isAsync) {
-                await day.executeAsync()
-            } else {
-                day.execute()
-            }
-            console.timeLog(key, msg)
-        }
+        console.timeLog(key, msg)
+
+        const p1 = lines[1].split('Part 1: ')[1]
+        const p2 = lines[2].split('Part 2: ')[1]
+        const duration = times[`@day${day.day}`].duration
+        const ms = `${duration.toFixed(4)} ms`
+
+        output('├─────┼───────────────────────────┼──────────────────────┼──────────────────────────────────────────┼─────────────┤')
+        output(`│ ${format(day.day, 3, 'L')} │ ${format(day.title, 25)} │ ${format(p1, 20)} │ ${format(p2, 40)} │ ${format(ms, 11, 'L')} │`)
     }
     console.timeLog('@advent-2024', 'to execute them all')
 
-    output('\r')
+    const total = `${times['@advent-2024'].duration.toFixed(4)} ms`
+
+    output('└─────┴───────────────────────────┴──────────────────────┴──────────────────────────────────────────┼─────────────┤')
+    output(`                                                                                                    │ ${format(total, 11, 'L')} │`)
+    output('                                                                                                    └─────────────┘')
+
     times['@advent-2024'].duration = 0 // For the sorting
 
     const order = Object.keys(times)
@@ -129,9 +146,7 @@ async function executeAll() {
     for (const key of order) {
         output(times[key].message)
     }
-
     output('\r')
-    output(times['@advent-2024'].message)
 }
 
 await executeAll()

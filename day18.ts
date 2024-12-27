@@ -20,7 +20,7 @@ type TInput = {
 
 export class Day18 extends Day<TInput> {
     constructor() {
-        super(18)
+        super(18, 'RAM Run')
     }
 
     clearMap(input: TInput): void {

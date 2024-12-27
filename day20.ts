@@ -41,7 +41,7 @@ export class Day20 extends Day<TMap> {
     indexes?: TPoint[][]
 
     constructor() {
-        super(20)
+        super(20, 'Race Condition')
     }
 
     loadInput(): TMap {

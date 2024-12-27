@@ -5,7 +5,7 @@ export class Day25 extends Day<void> {
     keys: number[][] = []
 
     constructor() {
-        super(25)
+        super(25, 'Code Chronicle')
     }
 
     loadInput(): void {

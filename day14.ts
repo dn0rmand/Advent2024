@@ -23,7 +23,7 @@ export class Day14 extends Day<TRobots> {
     yMiddle: number = 3
 
     constructor() {
-        super(14)
+        super(14, 'Restroom Redoubt')
     }
 
     parseRobot(input: string): TRobot {

@@ -25,7 +25,7 @@ function get(context: TGarden, x: number, y: number): string {
 
 export class Day12 extends Day<TGarden> {
     constructor() {
-        super(12)
+        super(12, 'Garden Groups')
     }
 
     buildPlot(context: TGarden, plot: TPlot, x: number, y: number): number {

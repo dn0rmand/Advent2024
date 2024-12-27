@@ -57,7 +57,7 @@ class TInput {
 
 export class Day8 extends Day<TInput> {
     constructor() {
-        super(8)
+        super(8, 'Resonant Collinearity')
     }
 
     loadInput(): TInput {

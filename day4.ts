@@ -77,7 +77,7 @@ class TMap {
 
 export class Day4 extends Day<TMap> {
     constructor() {
-        super(4)
+        super(4, 'Ceres Search')
     }
 
     loadInput(): TMap {

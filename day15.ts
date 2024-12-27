@@ -75,7 +75,7 @@ export class Day15 extends AsyncDay<string[]> {
     screen: Screen | undefined
 
     constructor() {
-        super(15)
+        super(15, 'Warehouse Woes')
         if (ANIMATE) {
             this.screen = new Screen(100, 50)
         }

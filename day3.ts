@@ -2,7 +2,7 @@ import { Day } from './tools/day.ts'
 
 export class Day3 extends Day<string> {
     constructor() {
-        super(3)
+        super(3, 'Mull It Over')
     }
 
     loadInput(): string {

@@ -9,7 +9,7 @@ export class Day5 extends Day<TInput> {
     unsorted: number[][] | undefined
 
     constructor() {
-        super(5)
+        super(5, 'Print Queue')
     }
 
     loadInput(): TInput {

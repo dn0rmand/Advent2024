@@ -7,7 +7,7 @@ type TInput = {
 
 export class Day1 extends Day<TInput> {
     constructor() {
-        super(1)
+        super(1, 'Historian Hysteria')
     }
 
     loadInput(): TInput {

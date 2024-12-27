@@ -33,7 +33,7 @@ function blink(stone: number, remaining: number): number {
 
 export class Day11 extends Day<number[]> {
     constructor() {
-        super(11)
+        super(11, 'Plutonian Pebbles')
     }
 
     loadInput(): number[] {

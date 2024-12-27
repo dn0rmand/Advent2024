@@ -80,7 +80,7 @@ export class Day16 extends Day<TMap> {
     visited: Uint32Array = new Uint32Array(MAX_KEY)
 
     constructor() {
-        super(16)
+        super(16, 'Reindeer Maze')
     }
 
     loadInput(): TMap {

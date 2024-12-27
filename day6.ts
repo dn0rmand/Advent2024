@@ -163,7 +163,7 @@ class TInput {
 
 export class Day6 extends Day<TInput> {
     constructor() {
-        super(6)
+        super(6, 'Guard Gallivant')
     }
 
     loadInput(): TInput {

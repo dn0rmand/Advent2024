@@ -7,7 +7,7 @@ export class Day23 extends Day<void> {
     max: number = 0
 
     constructor() {
-        super(23)
+        super(23, 'LAN Party')
     }
 
     loadInput(): void {

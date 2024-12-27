@@ -9,7 +9,7 @@ export class Day19 extends Day<TInput> {
     memoize: Map<string, number> = new Map()
 
     constructor() {
-        super(19)
+        super(19, 'Linen Layout')
     }
 
     loadInput(): TInput {

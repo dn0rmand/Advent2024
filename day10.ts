@@ -88,7 +88,7 @@ export class Day10 extends Day<TMap> {
     rating: number = -1
 
     constructor() {
-        super(10)
+        super(10, 'Hoof It')
     }
 
     loadInput(): TMap {

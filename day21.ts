@@ -30,7 +30,7 @@ const robotPad: { [key: string]: { x: number; y: number } } = {
 
 export class Day21 extends Day<TCodes> {
     constructor() {
-        super(21)
+        super(21, 'Keypad Conundrum')
     }
 
     loadInput(): TCodes {
